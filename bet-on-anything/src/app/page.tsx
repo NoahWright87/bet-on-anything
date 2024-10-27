@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { useState } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [roomCode, setRoomCode] = useState("");
