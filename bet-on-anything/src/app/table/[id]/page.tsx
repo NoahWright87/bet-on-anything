@@ -1,8 +1,10 @@
-import { useRouter } from 'next/router';
+"use client";
+
+import { useSearchParams } from 'next/navigation';
 
 export default function Table() {
-  const router = useRouter();
-  const { id } = router.query;
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id');
 
   return (
     <div>
