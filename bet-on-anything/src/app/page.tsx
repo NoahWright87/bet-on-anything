@@ -38,7 +38,7 @@ export default function Home() {
             type="text"
             value={roomCode}
             onChange={(e) => setRoomCode(e.target.value)}
-            className="border p-2"
+            className="border p-2 bg-white text-black"
           />
         </label>
         <button onClick={handleJoinRoom} className="bg-blue-500 text-white p-2">
