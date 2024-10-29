@@ -1,4 +1,15 @@
+"use client";
+
+import { useState } from "react";
+import ChipWidget from "../../components/ChipWidget";
+
 export default function FormatTest() {
+  const [amount, setAmount] = useState(0);
+
+  const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setAmount(parseInt(event.target.value, 10));
+  };
+
   const generateFillerContent = () => {
     const fillerContent = [];
     for (let i = 0; i < 100; i++) {
@@ -22,6 +33,21 @@ export default function FormatTest() {
       <p>Some filler content under heading 5.</p>
       <h6>Heading 6</h6>
       <p>Some filler content under heading 6.</p>
+      <div>
+        <label htmlFor="amount">Amount:</label>
+        <input
+          type="number"
+          id="amount"
+          name="amount"
+          min="0"
+          max="1000000"
+          step="1"
+          value={amount}
+          onChange={handleAmountChange}
+          className="border p-2 bg-white text-black"
+        />
+      </div>
+      <ChipWidget amount={amount} />
       {generateFillerContent()}
     </div>
   );
