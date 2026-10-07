@@ -1,0 +1,3 @@
+# Netlify auto-detects Next.js; this only pins the Node version.
+[build.environment]
+  NODE_VERSION = "20"
