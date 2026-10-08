@@ -8,6 +8,7 @@ Early work in progress. See [`ROADMAP.todo.md`](./ROADMAP.todo.md) for where it'
 
 - [Next.js](https://nextjs.org) (App Router) + React 18 + TypeScript
 - UI from [`@noahwright/design`](https://github.com/NoahWright87/design): no Tailwind or other CSS framework
+- Backend in [`worker/`](./worker): a [Hono](https://hono.dev) app on Cloudflare Workers with a Durable Object per table (not wired to the UI yet)
 
 ## Development
 
@@ -24,10 +25,12 @@ npm run build
 - `src/ui.ts`: client boundary re-exporting the design-system components used by server components
 - `src/components/`: app-specific components (`SiteShell`, `ThemeToggle`, `ChipWidget`)
 - `src/data/`: draft game data model (not wired up yet)
+- `worker/`: backend, a separate package with its own `package.json` (see its README)
 
 ## Changelog
 
 ### UI basics
 
 - Replaced the `create-next-app` scaffold and Tailwind with `@noahwright/design` (header, footer, hero, cards, inputs, light/dark theme toggle).
+- Added a stub backend in `worker/` (Hono + Durable Objects): create a table, join over WebSocket, live participant list.
 - Moved the app from the nested `bet-on-anything/` folder to the repo root.

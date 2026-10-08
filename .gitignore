@@ -399,3 +399,5 @@ FodyWeavers.xsd
 .next/
 next-env.d.ts
 *.tsbuildinfo
+.wrangler/
+.dev.vars
