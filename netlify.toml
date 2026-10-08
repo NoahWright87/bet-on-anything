@@ -1,3 +1,8 @@
-# Netlify auto-detects Next.js; this only pins the Node version.
+# Explicit settings so the build doesn't depend on what Netlify auto-detected when
+# the site was first linked (the app used to live in a nested folder).
+[build]
+  command = "npm run build"
+  publish = ".next"
+
 [build.environment]
   NODE_VERSION = "20"
