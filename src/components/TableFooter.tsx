@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button, Footer } from "@noahwright/design";
-import { usePlayer } from "../lib/player";
+import { useTable } from "../lib/game";
 import ChipCount from "./ChipCount";
 
 /**
@@ -11,7 +11,7 @@ import ChipCount from "./ChipCount";
  * for more stats.
  */
 export default function TableFooter({ code }: { code: string }) {
-  const player = usePlayer();
+  const { chips } = useTable(code);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export default function TableFooter({ code }: { code: string }) {
           </Button>
         </div>
       }
-      right={<ChipCount amount={player.chips} />}
+      right={<ChipCount amount={chips} />}
     />
   );
 }

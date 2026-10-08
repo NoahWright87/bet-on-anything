@@ -24,11 +24,15 @@ npm run build
 - `src/app/`: routes (`/`, `/table/[id]`, `/history`, `/about`) and global layout
 - `src/ui.ts`: client boundary re-exporting the design-system components used by server components
 - `src/components/`: app-specific components (`SiteShell`, `UserMenu`, `TableFooter`, `ChipCount`)
-- `src/lib/`: room codes, chip formatting, the placeholder player
+- `src/lib/`: game state (bets/chips), room codes, chip formatting, the placeholder player
 - `src/data/`: draft game data model (not wired up yet)
 - `worker/`: backend, a separate package with its own `package.json` (see its README)
 
 ## Changelog
+
+### Bets
+
+- Table page has a full-width BET button, bet cards below it, and a details dialog with counterbets. State is in-memory placeholder (`src/lib/game.tsx`) until the backend is wired up.
 
 ### Landing, table bar, and avatar menu
 

@@ -15,3 +15,13 @@ export function generateRoomCode(): string {
   }
   return code;
 }
+
+/** Room code from a `/table/[id]` route param (URL-encoded, any case). */
+export function tableCodeFromParam(param: string | undefined): string {
+  if (!param) return "";
+  try {
+    return sanitizeRoomCode(decodeURIComponent(param));
+  } catch {
+    return sanitizeRoomCode(param);
+  }
+}

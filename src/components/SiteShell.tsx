@@ -3,7 +3,7 @@
 import NextLink from "next/link";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { Footer, Header, Heading, HamburgerMenu, Layout, Link, Menu } from "@noahwright/design";
-import { sanitizeRoomCode } from "../lib/roomCode";
+import { tableCodeFromParam } from "../lib/roomCode";
 import TableFooter from "./TableFooter";
 import UserMenu from "./UserMenu";
 
@@ -37,7 +37,7 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
   const params = useParams<{ id?: string }>();
 
   const inTable = pathname.startsWith("/table/");
-  const tableCode = inTable && params.id ? sanitizeRoomCode(decodeURIComponent(params.id)) : "";
+  const tableCode = inTable ? tableCodeFromParam(params.id) : "";
 
   return (
     <Layout

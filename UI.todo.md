@@ -19,12 +19,16 @@ For friends and family playing on their phone while doing something else. Keep e
 - Header: hamburger nav, title, and an avatar (initials from the player's name) whose menu holds the light/dark toggle. Account controls will go in this menu.
 - Table pages swap the site footer for a sticky "in-game dashboard" bar (`TableFooter`): room code bottom-left (tap to copy), chip count bottom-right. The middle is empty on purpose, reserved for more table stats.
 - Chip counts use `formatChips`: whole number up to 9,999, then four significant digits with K/M/B/T (999,999 -> "1.000 M"), scientific notation from a quadrillion up. Thresholds are constants at the top of `src/lib/formatChips.ts`.
-- The current player is a placeholder in `src/lib/player.ts` ("First Last", 1,000 chips); `usePlayer()` is the seam for real data.
+- The current player is a placeholder in `src/lib/player.ts` ("First Last"); `usePlayer()` is the seam for real data.
+- Table page: a full-width BET button (opens a New bet dialog: description + stake), then one card per bet, about the same height as the button, newest first. Each card shows the claim, who backed it, how many counters, and the pot. Tapping a card (or Enter/Space on it) opens details: who backed it, who is against and for how much, the pot, and a COUNTER form (amount defaults to the original stake). Your own bets show no counter form. Placing or countering deducts chips, shown live in the sticky bar.
+- Bets and chips live in `src/lib/game.tsx` (`GameProvider` + `useTable(code)`): in-memory per table, reset on reload, seeded with two placeholder bets from other players ("Alex Rivera", "Sam Patel"). The Worker replaces this behind the same hook.
 
 ## Sooner
 
 - [ ] Real chip image to replace the SVG placeholder in `src/components/ChipImage.tsx`.
-- [ ] Table page body: replace the placeholder card with the bets list (visual, big tap targets).
+- [ ] Bet cards and the BET flow are functional but plain: make them more visual (avatars for who backed/countered, an odds or tug-of-war bar for backed vs. against, chips animating into the pot).
+- [ ] Bet resolution UI (who won, payout) once the rules are decided.
+- [ ] Dialogs are the design system's `Modal`, which closes after any action click, so submit buttons live inside the form and the modal's action area is just Cancel/Close. A `Modal` option for no action row or a controlled close would simplify this.
 - [ ] More table stats in the middle of the sticky bar (candidates: players at the table, your open bets, net winnings).
 - [ ] Decide whether the room-code box should also strip vowels or just accept any letters (today: any letters; codes are generated from consonants only).
 
