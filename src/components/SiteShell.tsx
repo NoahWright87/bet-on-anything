@@ -1,9 +1,11 @@
 "use client";
 
 import NextLink from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { Footer, Header, Heading, HamburgerMenu, Layout, Link, Menu } from "@noahwright/design";
-import ThemeToggle from "./ThemeToggle";
+import { sanitizeRoomCode } from "../lib/roomCode";
+import TableFooter from "./TableFooter";
+import UserMenu from "./UserMenu";
 
 const NAV = [
   { text: "Home", href: "/" },
@@ -11,9 +13,31 @@ const NAV = [
   { text: "About", href: "/about" },
 ];
 
+function SiteFooter() {
+  return (
+    <Footer
+      left={
+        <span className="site-credit">
+          © {new Date().getFullYear()}{" "}
+          <Link href="https://noahwright.dev" isExternal>Noah Wright</Link>
+        </span>
+      }
+      right={
+        <Link href="https://github.com/NoahWright87/bet-on-anything" isExternal variant="subtle">
+          Source
+        </Link>
+      }
+    />
+  );
+}
+
 export default function SiteShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const params = useParams<{ id?: string }>();
+
+  const inTable = pathname.startsWith("/table/");
+  const tableCode = inTable && params.id ? sanitizeRoomCode(decodeURIComponent(params.id)) : "";
 
   return (
     <Layout
@@ -31,34 +55,14 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
             />
           }
           center={
-            <NextLink href="/" style={{ color: "inherit", textDecoration: "none" }}>
+            <NextLink href="/" className="site-title">
               <Heading level={1}>Bet on Anything</Heading>
             </NextLink>
           }
-          right={<ThemeToggle />}
+          right={<UserMenu />}
         />
       }
-      footer={
-        <Footer
-          left={<Link as={NextLink} href="/about" variant="subtle">About</Link>}
-          center={
-            <>
-              Copyright ©{" "}
-              <Link href="https://noahwright.dev" isExternal>Noah Wright</Link>{" "}
-              {new Date().getFullYear()}
-            </>
-          }
-          right={
-            <Link
-              href="https://github.com/NoahWright87/bet-on-anything"
-              isExternal
-              variant="subtle"
-            >
-              Source
-            </Link>
-          }
-        />
-      }
+      footer={inTable ? <TableFooter code={tableCode} /> : <SiteFooter />}
     >
       {children}
     </Layout>
