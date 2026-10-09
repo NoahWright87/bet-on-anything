@@ -2,34 +2,38 @@
 
 import { useState } from "react";
 import { Button, Input, Modal } from "@noahwright/design";
-import { MAX_DESCRIPTION_LENGTH } from "../lib/game";
+import { MAX_LABEL_LENGTH, MAX_TITLE_LENGTH } from "../lib/game";
 
-const DEFAULT_STAKE = 100;
+const DEFAULT_STAKE = 50;
 
 /** Mounted only while open, so the form starts fresh each time. */
 export default function NewBetDialog({
   chips,
-  onPlace,
+  onCreate,
   onClose,
 }: {
   chips: number;
-  onPlace: (description: string, amount: number) => boolean;
+  onCreate: (title: string, guess: string, amount: number) => string | null;
   onClose: () => void;
 }) {
-  const [description, setDescription] = useState("");
+  const [title, setTitle] = useState("");
+  const [guess, setGuess] = useState("");
   const [amountText, setAmountText] = useState(String(Math.min(DEFAULT_STAKE, chips)));
   const [attempted, setAttempted] = useState(false);
+  const [serverError, setServerError] = useState<string>();
 
   const amount = Number(amountText);
-  const descriptionError = description.trim() ? undefined : "Describe the bet";
-  const amountError =
-    Number.isInteger(amount) && amount >= 1 && amount <= chips ? undefined : `Pick 1 to ${chips} chips`;
+  const titleError = title.trim() ? undefined : "Name the bet";
+  const guessError = guess.trim() ? undefined : "Add your guess";
+  const amountError = Number.isInteger(amount) && amount >= 1 && amount <= chips ? undefined : `Pick 1 to ${chips} chips`;
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     setAttempted(true);
-    if (descriptionError || amountError) return;
-    if (onPlace(description, amount)) onClose();
+    if (titleError || guessError || amountError) return;
+    const err = onCreate(title, guess, amount);
+    if (err) setServerError(err);
+    else onClose();
   };
 
   return (
@@ -37,13 +41,19 @@ export default function NewBetDialog({
       <form className="bet-form" onSubmit={submit}>
         <Input
           label="What's the bet?"
-          name="description"
-          multiline
-          rows={2}
-          placeholder="Dad falls asleep before the second half"
-          value={description}
-          onChange={(e) => setDescription(e.target.value.slice(0, MAX_DESCRIPTION_LENGTH))}
-          error={attempted ? descriptionError : undefined}
+          name="title"
+          placeholder="Challenge winner"
+          value={title}
+          onChange={(e) => setTitle(e.target.value.slice(0, MAX_TITLE_LENGTH))}
+          error={attempted ? titleError : undefined}
+        />
+        <Input
+          label="Your guess"
+          name="guess"
+          placeholder="Andy"
+          value={guess}
+          onChange={(e) => setGuess(e.target.value.slice(0, MAX_LABEL_LENGTH))}
+          error={attempted ? guessError : undefined}
         />
         <Input
           label="Your stake (chips)"
@@ -51,7 +61,7 @@ export default function NewBetDialog({
           type="number"
           value={amountText}
           onChange={(e) => setAmountText(e.target.value)}
-          error={attempted ? amountError : undefined}
+          error={attempted ? amountError ?? serverError : undefined}
         />
         <Button type="submit" size="large" style={{ width: "100%" }}>
           PLACE BET

@@ -20,14 +20,15 @@ For friends and family playing on their phone while doing something else. Keep e
 - Table pages swap the site footer for a sticky "in-game dashboard" bar (`TableFooter`): room code bottom-left (tap to copy), chip count bottom-right. The middle is empty on purpose, reserved for more table stats.
 - Chip counts use `formatChips`: whole number up to 9,999, then four significant digits with K/M/B/T (999,999 -> "1.000 M"), scientific notation from a quadrillion up. Thresholds are constants at the top of `src/lib/formatChips.ts`.
 - The current player is a placeholder in `src/lib/player.ts` ("First Last"); `usePlayer()` is the seam for real data.
-- Table page: a full-width BET button (opens a New bet dialog: description + stake), then one card per bet, about the same height as the button, newest first. Each card shows the claim, who backed it, how many counters, and the pot. Tapping a card (or Enter/Space on it) opens details: who backed it, who is against and for how much, the pot, and a COUNTER form (amount defaults to the original stake). Your own bets show no counter form. Placing or countering deducts chips, shown live in the sticky bar.
-- Bets and chips live in `src/lib/game.tsx` (`GameProvider` + `useTable(code)`): in-memory per table, reset on reload, seeded with two placeholder bets from other players ("Alex Rivera", "Sam Patel"). The Worker replaces this behind the same hook.
+- Table page: a full-width BET button opens New bet (title, your guess, stake). Each bet is a full-width card: the title small and out of the way at the top left, the pot at the top right, then a row of **guess chips** (a number on a chip, the guess underneath), a dashed purple `+` chip to add a guess, and "👈 Not that" pinned to the far right. Tapping a chip opens a dialog: who backed it, a bet field, and a tucked-away "Settle this bet". Betting on a guess stacks one more chip in your color; the total is on the front chip. Pending results show a confirm banner; settled bets show trophies, dimmed losers, and what you got. Anything with new activity jumps to the top. The host can close the table from the avatar menu. See `RULES.todo.md` for the rules and open questions.
+- Bets and chips live in `src/lib/game.tsx` (`GameProvider` + `useTable(code)`) on top of the pure rules in `src/lib/bets.ts`: in-memory per table, reset on reload, seeded with three placeholder bets from other players. A "Demo: a friend confirms" button (`DEMO_MODE` in `game.tsx`) lets one person try the confirm flow alone. The Worker replaces all of this behind the same hook.
 
 ## Sooner
 
 - [ ] Real chip image to replace the SVG placeholder in `src/components/ChipImage.tsx`.
-- [ ] Bet cards and the BET flow are functional but plain: make them more visual (avatars for who backed/countered, an odds or tug-of-war bar for backed vs. against, chips animating into the pot).
-- [ ] Bet resolution UI (who won, payout) once the rules are decided.
+- [ ] Polish the bet cards: chips animating into the pot and a short celebration when a bet settles in your favor, a real chip image, a "new activity" glow so changes are noticeable when a bet jumps to the top.
+- [ ] Table settings screen (house bid, confirmations required, close table). Today "Close table" sits in the avatar menu as a stopgap.
+- [ ] Remove the `DEMO_MODE` demo button when the backend is wired up.
 - [ ] Dialogs are the design system's `Modal`, which closes after any action click, so submit buttons live inside the form and the modal's action area is just Cancel/Close. A `Modal` option for no action row or a controlled close would simplify this.
 - [ ] More table stats in the middle of the sticky bar (candidates: players at the table, your open bets, net winnings).
 - [ ] Decide whether the room-code box should also strip vowels or just accept any letters (today: any letters; codes are generated from consonants only).
