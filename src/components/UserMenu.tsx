@@ -6,8 +6,9 @@ import { Avatar, Menu, Modal, Text, getThemeMode, toggleThemeMode } from "@noahw
 import { useTable } from "../lib/game";
 import { usePlayer } from "../lib/player";
 import { tableCodeFromParam } from "../lib/roomCode";
+import TableSettingsDialog from "./TableSettingsDialog";
 
-/** Avatar in the header; opens the account menu. Account (and, for now, host) controls live here. */
+/** Avatar in the header; opens the account menu. Account (and, for now, host) controls live here: the host gets Table settings. */
 export default function UserMenu() {
   const player = usePlayer();
   const pathname = usePathname();
@@ -16,6 +17,7 @@ export default function UserMenu() {
   const table = useTable(inTable ? tableCodeFromParam(params.id) : "");
 
   const [isDark, setIsDark] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [confirmClose, setConfirmClose] = useState(false);
 
   useEffect(() => {
@@ -31,7 +33,7 @@ export default function UserMenu() {
     },
   ];
   if (inTable && table.isHost && !table.closed) {
-    items.push({ icon: "🔒", text: "Close table", onClick: () => setConfirmClose(true) } as (typeof items)[number]);
+    items.push({ icon: "⚙️", text: "Table settings", onClick: () => setSettingsOpen(true) } as (typeof items)[number]);
   }
 
   return (
@@ -42,6 +44,14 @@ export default function UserMenu() {
         trigger={<Avatar name={player.name} alt="Account menu" size={40} />}
         items={items}
       />
+      {settingsOpen && (
+        <TableSettingsDialog
+          settings={table.settings}
+          onSave={table.updateSettings}
+          onRequestClose={() => setConfirmClose(true)}
+          onClose={() => setSettingsOpen(false)}
+        />
+      )}
       {confirmClose && (
         <Modal
           open

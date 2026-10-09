@@ -5,6 +5,7 @@ import { Button, Input, Modal, Text } from "@noahwright/design";
 import {
   NOT_THAT_ID,
   allOptions,
+  houseStake,
   optionTotal,
   type Bet,
   type TableSettings,
@@ -84,7 +85,8 @@ export default function OptionDialog({
 
         {isNotThat && (
           <Text tone="muted">
-            Wins if none of the guesses do. The house has already put in {settings.houseBid * bet.options.length}.
+            Wins if none of the guesses do.
+            {houseStake(bet, settings) > 0 && ` The house has put in ${houseStake(bet, settings)}.`}
             {canBet && " Risky: more guesses can be added later."}
           </Text>
         )}

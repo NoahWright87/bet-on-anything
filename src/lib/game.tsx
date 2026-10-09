@@ -26,9 +26,27 @@ export const MAX_LABEL_LENGTH = 24;
 
 /** Shows a "pretend a friend confirmed" button so one person can try the whole flow. Remove with the backend. */
 export const DEMO_MODE = true;
-const DEMO_FRIENDS = ["Alex Rivera", "Sam Patel", "Jordan Lee"];
 
-type TableState = { chips: number; bets: Bet[]; settings: TableSettings; closed: boolean };
+type TableState = {
+  others: string[]; // the other players at the table (you are always there)
+  bets: Bet[];
+  settings: TableSettings;
+  closed: boolean;
+};
+
+/**
+ * A player's chips are derived, never stored: they start with STARTING_CHIPS, lose what they
+ * stake, and gain what they are paid. (The house is not a player.)
+ */
+export function chipsOf(player: string, bets: Bet[]): number {
+  let chips = STARTING_CHIPS;
+  for (const bet of bets) {
+    const wagers = [...bet.options.flatMap((o) => o.wagers), ...bet.notThat];
+    for (const w of wagers) if (w.player === player) chips -= w.amount;
+    chips += bet.result?.payouts[player] ?? 0;
+  }
+  return chips;
+}
 
 /** Placeholder bets from other players so a new table isn't empty. Remove once bets are real. */
 function sampleBets(settings: TableSettings): Bet[] {
@@ -71,8 +89,9 @@ function sampleBets(settings: TableSettings): Bet[] {
 }
 
 // Shared, never mutated: a table nobody has touched yet renders these same seed bets.
+const SAMPLE_PLAYERS = ["Alex Rivera", "Sam Patel", "Jordan Lee"];
 const INITIAL: TableState = {
-  chips: STARTING_CHIPS,
+  others: SAMPLE_PLAYERS,
   bets: sampleBets(DEFAULT_SETTINGS),
   settings: DEFAULT_SETTINGS,
   closed: false,
@@ -111,13 +130,22 @@ const cleanLabel = (s: string) => s.trim().replace(/\s+/g, " ").slice(0, MAX_LAB
 const hasLabel = (bet: Bet, label: string) =>
   bet.options.some((o) => o.label.toLowerCase() === label.toLowerCase());
 
-/** Settles the bet once enough different players agree; pays out your share into `chips`. */
-function settleIfReady(t: TableState, bet: Bet, you: string): { bet: Bet; chips: number } {
+/** Settles the bet once enough different players agree. Payouts show up in everyone's derived chips. */
+function settleIfReady(settings: TableSettings, bet: Bet): Bet {
   const p = bet.proposal;
-  if (!p || p.confirmedBy.length < t.settings.confirmationsRequired) return { bet, chips: t.chips };
-  const result = computeResult(bet, t.settings, p.winners);
-  return { bet: { ...bet, proposal: undefined, result }, chips: t.chips + (result.payouts[you] ?? 0) };
+  if (!p || p.confirmedBy.length < settings.confirmationsRequired) return bet;
+  return { ...bet, proposal: undefined, result: computeResult(bet, settings, p.winners) };
 }
+
+const replaceBet = (t: TableState, betId: string, fn: (b: Bet) => Bet): TableState => ({
+  ...t,
+  bets: t.bets.map((b) => (b.id === betId ? fn(b) : b)),
+});
+
+const canAfford = (t: TableState, amount: number, player: string) =>
+  !stakeError(amount, chipsOf(player, t.bets));
+
+export type PlayerSummary = { name: string; chips: number; isYou: boolean };
 
 export function useTable(code: string) {
   const ctx = useContext(GameContext);
@@ -125,13 +153,10 @@ export function useTable(code: string) {
   const { name: you } = usePlayer();
   const { tables, update } = ctx;
   const table = tables[code] ?? INITIAL;
+  const chips = chipsOf(you, table.bets);
 
   // Actions validate against the current snapshot (state updaters run later, so they can't
   // report back), then re-check inside the updater so a stale double-submit can't overspend.
-  const replaceBet = (t: TableState, betId: string, fn: (b: Bet) => Bet): TableState => ({
-    ...t,
-    bets: t.bets.map((b) => (b.id === betId ? fn(b) : b)),
-  });
 
   const createBet = useCallback(
     (title: string, guess: string, amount: number): string | null => {
@@ -140,7 +165,7 @@ export function useTable(code: string) {
       if (table.closed) return "This table is closed";
       if (!text) return "Name the bet";
       if (!label) return "Add your guess";
-      const err = stakeError(amount, table.chips);
+      const err = stakeError(amount, chips);
       if (err) return err;
       const bet: Bet = {
         id: nextId("bet"),
@@ -150,10 +175,10 @@ export function useTable(code: string) {
         notThat: [],
         updatedAt: tick(),
       };
-      update(code, (t) => (stakeError(amount, t.chips) ? t : { ...t, chips: t.chips - amount, bets: [bet, ...t.bets] }));
+      update(code, (t) => (canAfford(t, amount, you) ? { ...t, bets: [bet, ...t.bets] } : t));
       return null;
     },
-    [code, table.chips, table.closed, update, you],
+    [code, chips, table.closed, update, you],
   );
 
   const addOption = useCallback(
@@ -163,55 +188,49 @@ export function useTable(code: string) {
       if (!bet || bet.result || table.closed) return "This bet is closed";
       if (!label) return "Add your guess";
       if (hasLabel(bet, label) || label.toLowerCase() === "not that") return `"${label}" is already an option`;
-      const err = stakeError(amount, table.chips);
+      const err = stakeError(amount, chips);
       if (err) return err;
       const option = { id: nextId("opt"), label, wagers: [{ id: nextId("w"), player: you, amount }] };
       const at = tick();
       update(code, (t) =>
-        stakeError(amount, t.chips)
-          ? t
-          : {
-              ...replaceBet(t, betId, (b) => ({
-                ...b,
-                options: [...b.options, option],
-                proposal: undefined, // a new option invalidates any proposed result
-                updatedAt: at,
-              })),
-              chips: t.chips - amount,
-            },
+        canAfford(t, amount, you)
+          ? replaceBet(t, betId, (b) => ({
+              ...b,
+              options: [...b.options, option],
+              proposal: undefined, // a new option invalidates any proposed result
+              updatedAt: at,
+            }))
+          : t,
       );
       return null;
     },
-    [code, table.bets, table.chips, table.closed, update, you],
+    [code, table.bets, chips, table.closed, update, you],
   );
 
   const wager = useCallback(
     (betId: string, optionId: string, amount: number): string | null => {
       const bet = table.bets.find((b) => b.id === betId);
       if (!bet || bet.result || table.closed) return "This bet is closed";
-      const err = stakeError(amount, table.chips);
+      const err = stakeError(amount, chips);
       if (err) return err;
       const entry: Wager = { id: nextId("w"), player: you, amount };
       const at = tick();
       update(code, (t) =>
-        stakeError(amount, t.chips)
-          ? t
-          : {
-              ...replaceBet(t, betId, (b) => ({
-                ...b,
-                options:
-                  optionId === NOT_THAT_ID
-                    ? b.options
-                    : b.options.map((o) => (o.id === optionId ? { ...o, wagers: [...o.wagers, entry] } : o)),
-                notThat: optionId === NOT_THAT_ID ? [...b.notThat, entry] : b.notThat,
-                updatedAt: at,
-              })),
-              chips: t.chips - amount,
-            },
+        canAfford(t, amount, you)
+          ? replaceBet(t, betId, (b) => ({
+              ...b,
+              options:
+                optionId === NOT_THAT_ID
+                  ? b.options
+                  : b.options.map((o) => (o.id === optionId ? { ...o, wagers: [...o.wagers, entry] } : o)),
+              notThat: optionId === NOT_THAT_ID ? [...b.notThat, entry] : b.notThat,
+              updatedAt: at,
+            }))
+          : t,
       );
       return null;
     },
-    [code, table.bets, table.chips, table.closed, update, you],
+    [code, table.bets, chips, table.closed, update, you],
   );
 
   /** Adds/removes an option from the proposed winners; changing the proposal restarts confirmations. */
@@ -227,8 +246,7 @@ export function useTable(code: string) {
           proposal: winners.length ? { winners, proposedBy: you, confirmedBy: [you] } : undefined,
           updatedAt: at,
         };
-        const settled = settleIfReady(t, proposed, you);
-        return { ...replaceBet(t, betId, () => settled.bet), chips: settled.chips };
+        return replaceBet(t, betId, () => settleIfReady(t.settings, proposed));
       });
     },
     [code, update, you],
@@ -245,11 +263,10 @@ export function useTable(code: string) {
           proposal: { ...bet.proposal, confirmedBy: [...bet.proposal.confirmedBy, who] },
           updatedAt: at,
         };
-        const settled = settleIfReady(t, confirmed, you);
-        return { ...replaceBet(t, betId, () => settled.bet), chips: settled.chips };
+        return replaceBet(t, betId, () => settleIfReady(t.settings, confirmed));
       });
     },
-    [code, update, you],
+    [code, update],
   );
 
   const confirmResolution = useCallback((betId: string) => confirmWith(betId, you), [confirmWith, you]);
@@ -258,15 +275,23 @@ export function useTable(code: string) {
   const simulateFriendConfirm = useCallback(
     (betId: string) => {
       const bet = table.bets.find((b) => b.id === betId);
-      const friend = DEMO_FRIENDS.find((f) => !bet?.proposal?.confirmedBy.includes(f));
+      const friend = table.others.find((f) => !bet?.proposal?.confirmedBy.includes(f));
       if (friend) confirmWith(betId, friend);
     },
-    [confirmWith, table.bets],
+    [confirmWith, table.bets, table.others],
   );
 
   const cancelProposal = useCallback(
     (betId: string): void => {
       update(code, (t) => replaceBet(t, betId, (b) => ({ ...b, proposal: undefined, updatedAt: tick() })));
+    },
+    [code, update],
+  );
+
+  /** Changing the house bid or confirmations applies to open bets; settled bets keep their result. */
+  const updateSettings = useCallback(
+    (settings: TableSettings): void => {
+      update(code, (t) => ({ ...t, settings }));
     },
     [code, update],
   );
@@ -277,10 +302,22 @@ export function useTable(code: string) {
 
   const bets = useMemo(() => [...table.bets].sort((a, b) => b.updatedAt - a.updatedAt), [table.bets]);
 
+  // You first, then everyone else by chips (richest first).
+  const players: PlayerSummary[] = useMemo(
+    () => [
+      { name: you, chips: chipsOf(you, table.bets), isYou: true },
+      ...table.others
+        .map((name) => ({ name, chips: chipsOf(name, table.bets), isYou: false }))
+        .sort((a, b) => b.chips - a.chips),
+    ],
+    [you, table.bets, table.others],
+  );
+
   return {
     you,
     isHost: true, // placeholder: whoever opens the table is the host until accounts exist
-    chips: table.chips,
+    chips,
+    players,
     bets,
     settings: table.settings,
     closed: table.closed,
@@ -291,6 +328,7 @@ export function useTable(code: string) {
     confirmResolution,
     simulateFriendConfirm,
     cancelProposal,
+    updateSettings,
     closeTable,
   };
 }

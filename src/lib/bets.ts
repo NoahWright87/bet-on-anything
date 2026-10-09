@@ -6,8 +6,11 @@
  * "Not that" outcome (anything not listed) that the house backs automatically.
  *
  * Placeholder rules, all tunable per table via `TableSettings`:
- * - The house backs "Not that" with `houseBid` chips for every listed option, so a lone
- *   winner still earns something. House chips are minted, so the economy inflates on purpose.
+ * - Every time a player bets on a listed option, the house adds a bet on "Not that" of
+ *   `houseBidPercent` of that bet, but at least `houseBidMin` chips. So a lone winner still
+ *   earns something, and the house pool grows with every bet (early and often pays). House
+ *   chips are minted, so the economy inflates on purpose. Setting both to 0 turns it off;
+ *   "Not that" stays, it just gets no automatic bets.
  * - Payout is pooled: everything staked (house included) is split among the backers of the
  *   winning option(s) in proportion to their stakes. Several winners (a tie) pool together.
  * - The house's share of a win disappears.
@@ -47,18 +50,33 @@ export type Bet = {
 };
 
 export type TableSettings = {
-  houseBid: number; // chips the house puts on "Not that" per listed option
+  houseBidPercent: number; // % of each bet on a listed option that the house adds to "Not that"
+  houseBidMin: number; // ...but never fewer than this many chips (0 and 0 disables the house bid)
   confirmationsRequired: number; // distinct players needed to settle a bet
 };
 
-export const DEFAULT_SETTINGS: TableSettings = { houseBid: 1, confirmationsRequired: 2 };
+export const DEFAULT_SETTINGS: TableSettings = { houseBidPercent: 1, houseBidMin: 1, confirmationsRequired: 2 };
+
+/** The house's automatic "Not that" bet in response to one bet of `amount` on a listed option. */
+export function houseBidFor(amount: number, settings: TableSettings): number {
+  const pct = Number.isFinite(settings.houseBidPercent) ? Math.max(0, settings.houseBidPercent) : 0;
+  const min = Number.isFinite(settings.houseBidMin) ? Math.max(0, Math.round(settings.houseBidMin)) : 0;
+  return Math.max(Math.round((amount * pct) / 100), min);
+}
+
+/** Total chips the house has put on "Not that": one automatic bet per bet on a listed option. */
+export function houseStake(bet: Bet, settings: TableSettings): number {
+  return bet.options
+    .flatMap((o) => o.wagers)
+    .reduce((sum, w) => sum + houseBidFor(w.amount, settings), 0);
+}
 
 /** All outcomes of a bet, "Not that" last, with the house's automatic wager included. */
 export function allOptions(bet: Bet, settings: TableSettings): (BetOption & { isNotThat: boolean })[] {
   const house: Wager = {
     id: `${bet.id}-house`,
     player: HOUSE,
-    amount: settings.houseBid * bet.options.length,
+    amount: houseStake(bet, settings),
   };
   return [
     ...bet.options.map((o) => ({ ...o, isNotThat: false })),

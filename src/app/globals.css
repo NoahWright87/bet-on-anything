@@ -107,27 +107,80 @@
 }
 
 /* --- Table: sticky bottom bar --- */
-.hud__code {
+.hud {
+  flex: 1 1 auto;
+  min-width: 0;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  padding: var(--spacing-xs) 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) 0;
 }
 
-.hud__caption {
-  font-size: 0.65rem;
-  line-height: 1;
-  color: color-mix(in srgb, var(--foreground) 55%, transparent);
-}
-
-.chip-count {
+.hud__you {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
   font-size: var(--text-xl);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+}
+
+.hud__you-chips {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+/* Everyone else: right-aligned, wrapping, scrolling if the table is big. */
+.hud__others {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 2px var(--spacing-md);
+  max-height: 3.75rem;
+  overflow-y: auto;
+  min-width: 0;
+}
+
+.hud__other {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+
+.hud__other-name {
+  max-width: 5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
+.hud__other-chips {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Room code: a quiet footnote, still tappable. */
+.hud__code {
+  border: 0;
+  background: none;
+  padding: 2px var(--spacing-sm);
+  font: inherit;
+  font-size: 0.7rem;
+  color: color-mix(in srgb, var(--foreground) 55%, transparent);
+  cursor: pointer;
+}
+
+.hud__code-value {
+  font-family: var(--font-family-mono);
+  letter-spacing: 0.15em;
+  color: color-mix(in srgb, var(--foreground) 75%, transparent);
 }
 
 /* --- Bets --- */

@@ -1,7 +1,7 @@
 "use client";
 
 import { HOUSE, formatChipsCompact, optionTotal, type Wager } from "../lib/bets";
-import { playerColor } from "../lib/colors";
+import { HOUSE_COLOR, playerColor } from "../lib/colors";
 import ChipToken from "./ChipToken";
 
 export type TileState = "normal" | "proposed" | "winner" | "loser";
@@ -43,6 +43,11 @@ export default function OptionTile({
       }. Open`}
     >
       <span className="option-tile__stack" style={{ width }}>
+        {shown.length === 0 && (
+          <span className="option-tile__chip" style={{ left: 0 }}>
+            <ChipToken color={HOUSE_COLOR} label="0" outline />
+          </span>
+        )}
         {shown.map((player, i) => (
           <span key={player} className="option-tile__chip" style={{ left: i * OFFSET, zIndex: i }}>
             <ChipToken

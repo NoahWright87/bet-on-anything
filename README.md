@@ -32,7 +32,7 @@ npm run build
 
 ### Multi-guess bets
 
-- A bet is a question with several guesses (chips), a `+` chip to add more, and an automatic "Not that" backed by the house. Pooled payouts, multi-person confirmation, ties, activity ordering, and closing the table. State is an in-memory placeholder (`src/lib/game.tsx`) over the pure rules in `src/lib/bets.ts`; see `RULES.todo.md`.
+- A bet is a question with several guesses (chips), a `+` chip to add more, and an automatic "Not that" backed by the house. House bid (percentage + minimum, set per table), pooled payouts, multi-person confirmation, ties, activity ordering, and closing the table. The sticky footer shows every player's chips. State is an in-memory placeholder (`src/lib/game.tsx`) over the pure rules in `src/lib/bets.ts`; see `RULES.todo.md`.
 
 ### Landing, table bar, and avatar menu
 
