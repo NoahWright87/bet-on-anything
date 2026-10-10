@@ -6,3 +6,8 @@
 
 [build.environment]
   NODE_VERSION = "20"
+
+# Serves the Next.js build (static pages + the dynamic /table/[id] route). Without
+# this the deploy is just the raw .next folder, which 404s at the site root.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

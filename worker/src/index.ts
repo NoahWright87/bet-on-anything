@@ -11,9 +11,11 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>();
 
-const CONSONANTS = "bcdfghjklmnpqrstvwxyz";
+// Codes are generated from consonants only (so they can't spell words), but players may
+// type any letters, so validation accepts A-Z. Codes are case-insensitive: stored uppercase.
+const CONSONANTS = "BCDFGHJKLMNPQRSTVWXYZ";
 const CODE_LENGTH = 8;
-const CODE_PATTERN = new RegExp(`^[${CONSONANTS}]{${CODE_LENGTH}}$`);
+const CODE_PATTERN = new RegExp(`^[A-Z]{${CODE_LENGTH}}$`);
 
 function generateRoomCode(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(CODE_LENGTH));
@@ -44,7 +46,7 @@ app.post("/api/tables", async (c) => {
 
 // Does this table exist? Lets the UI show "no such table" before opening a socket.
 app.get("/api/tables/:code", async (c) => {
-  const code = c.req.param("code");
+  const code = c.req.param("code").toUpperCase();
   if (!CODE_PATTERN.test(code)) return c.json({ error: "Invalid room code" }, 400);
   const stub = c.env.TABLE.get(c.env.TABLE.idFromName(code));
   return (await stub.exists()) ? c.json({ code }) : c.json({ error: "No such table" }, 404);
@@ -52,7 +54,7 @@ app.get("/api/tables/:code", async (c) => {
 
 // Live connection for a table. Browsers don't enforce CORS on WebSockets, so check Origin here.
 app.get("/api/tables/:code/ws", async (c) => {
-  const code = c.req.param("code");
+  const code = c.req.param("code").toUpperCase();
   if (!CODE_PATTERN.test(code)) return c.json({ error: "Invalid room code" }, 400);
   if (!allowedOrigins(c.env).includes(c.req.header("Origin") ?? "")) {
     return c.json({ error: "Origin not allowed" }, 403);

@@ -2,45 +2,55 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Container, Heading, Hero, Input, Text } from "../ui";
-import { generateRoomCode } from "../constants/Constants";
+import { Button, Input, Text } from "../ui";
+import { ROOM_CODE_LENGTH, generateRoomCode, sanitizeRoomCode } from "../lib/roomCode";
 
 export default function Home() {
   const [roomCode, setRoomCode] = useState("");
   const router = useRouter();
 
+  const canJoin = roomCode.length === ROOM_CODE_LENGTH;
+
   const joinTable = (e: React.FormEvent) => {
     e.preventDefault();
-    const code = roomCode.trim();
-    if (code) router.push(`/table/${encodeURIComponent(code)}`);
+    if (canJoin) router.push(`/table/${roomCode}`);
   };
+
+  const hostTable = () => router.push(`/table/${generateRoomCode()}`);
 
   return (
     <>
-      <Hero
-        title={<Heading level={1} gradient animateIn>Bet on Anything!</Heading>}
-        description={<Text>Pick a table, throw in some chips, and settle it like friends.</Text>}
-        actions={
-          <Button variant="solid" onClick={() => router.push(`/table/${generateRoomCode()}`)}>
-            Create a table
-          </Button>
-        }
-        background="subtle"
-      />
-      <Container padding="lg" centered>
-        <form className="page__row" onSubmit={joinTable}>
-          <Input
-            label="Room code"
-            name="roomCode"
-            placeholder="e.g. bkxqmtvz"
-            value={roomCode}
-            onChange={(e) => setRoomCode(e.target.value)}
-          />
-          <Button type="submit" variant="outline" disabled={!roomCode.trim()}>
-            Join table
+      <section className="landing-hero" aria-label="Join or host a table">
+        <form className="landing-hero__join" onSubmit={joinTable}>
+          <div className="room-code">
+            <Input
+              label="Room code"
+              name="roomCode"
+              placeholder="ROOM CODE"
+              value={roomCode}
+              onChange={(e) => setRoomCode(sanitizeRoomCode(e.target.value))}
+            />
+          </div>
+          <Button type="submit" size="large" disabled={!canJoin}>
+            JOIN
           </Button>
         </form>
-      </Container>
+        <div className="landing-hero__host">
+          <Button size="large" color="secondary" onClick={hostTable} style={{ fontSize: "var(--text-xl)", padding: "1.25rem 1.5rem" }}>
+            HOST
+          </Button>
+        </div>
+      </section>
+
+      <div className="page">
+        <details className="about-details">
+          <summary>What is this?</summary>
+          <Text>
+            Bet on Anything is a game for friends and family. One person hosts a table, everyone
+            else joins with the room code, and you wager chips on whatever is going on around you.
+          </Text>
+        </details>
+      </div>
     </>
   );
 }

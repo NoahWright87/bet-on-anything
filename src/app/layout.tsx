@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "@noahwright/design/styles.css";
 import "./globals.css";
 import SiteShell from "../components/SiteShell";
+import { GameProvider } from "../lib/game";
 
 export const metadata: Metadata = {
   title: "Bet on Anything",
@@ -19,7 +20,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
       </head>
       <body>
-        <SiteShell>{children}</SiteShell>
+        <GameProvider>
+          <SiteShell>{children}</SiteShell>
+        </GameProvider>
       </body>
     </html>
   );

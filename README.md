@@ -23,11 +23,20 @@ npm run build
 
 - `src/app/`: routes (`/`, `/table/[id]`, `/history`, `/about`) and global layout
 - `src/ui.ts`: client boundary re-exporting the design-system components used by server components
-- `src/components/`: app-specific components (`SiteShell`, `ThemeToggle`, `ChipWidget`)
+- `src/components/`: app-specific components (`SiteShell`, `UserMenu`, `TableFooter`, `ChipCount`)
+- `src/lib/`: betting rules (`bets.ts`), game state (`game.tsx`), room codes, chip formatting, the placeholder player
 - `src/data/`: draft game data model (not wired up yet)
 - `worker/`: backend, a separate package with its own `package.json` (see its README)
 
 ## Changelog
+
+### Multi-guess bets
+
+- A bet is a question with several guesses (chips), a `+` chip to add more, and an automatic "Not that" backed by the house. House bid (percentage + minimum, set per table), pooled payouts, multi-person confirmation, ties, activity ordering, and closing the table. The sticky footer shows every player's chips. State is an in-memory placeholder (`src/lib/game.tsx`) over the pure rules in `src/lib/bets.ts`; see `RULES.todo.md`.
+
+### Landing, table bar, and avatar menu
+
+- Landing page is now just JOIN (room code) and HOST. Table pages get a sticky bottom bar with the room code and your chips. The light/dark toggle moved into an avatar menu.
 
 ### UI basics
 
