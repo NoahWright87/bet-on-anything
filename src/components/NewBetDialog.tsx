@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button, Input, Modal } from "@noahwright/design";
-import { MAX_LABEL_LENGTH, MAX_TITLE_LENGTH } from "../lib/game";
+import { MAX_LABEL_LENGTH, MAX_TITLE_LENGTH } from "../../shared/limits";
 
 const DEFAULT_STAKE = 50;
 

@@ -19,9 +19,9 @@ For friends and family playing on their phone while doing something else. Keep e
 - Header: hamburger nav, title, and an avatar (initials from the player's name) whose menu holds the light/dark toggle. Account controls will go in this menu.
 - Table pages swap the site footer for a sticky "in-game dashboard" bar (`TableFooter`): your chips big and left-aligned with no name; every other player right-aligned as a small chip, first name and amount (richest first; wraps, scrolls if the table is big); the room code as a quiet, tappable footnote underneath (tap to copy). More table-specific stats can join the bar later.
 - Chip counts use `formatChips`: whole number up to 9,999, then four significant digits with K/M/B/T (999,999 -> "1.000 M"), scientific notation from a quadrillion up. Thresholds are constants at the top of `src/lib/formatChips.ts`.
-- The current player is a placeholder in `src/lib/player.ts` ("First Last"); `usePlayer()` is the seam for real data.
+- The current player is the name you pick the first time you sit at a table (`NamePrompt`), remembered per device in `localStorage` (`src/lib/player.ts`). Table pages show "No such table" for unknown codes, "Joining the table…" while connecting, and a dismissible notice for refused actions or a lost connection.
 - Table page: a full-width BET button opens New bet (title, your guess, stake). Each bet is a full-width card: the title small and out of the way at the top left, the pot at the top right, then a row of **guess chips** (a number on a chip, the guess underneath), a dashed purple `+` chip to add a guess, and "👈 Not that" pinned to the far right. Tapping a chip opens a dialog: who backed it, a bet field, and a tucked-away "Settle this bet". Betting on a guess stacks one more chip in your color; the total is on the front chip. Pending results show a confirm banner; settled bets show trophies, dimmed losers, and what you got. Anything with new activity jumps to the top. The host opens **Table settings** from the avatar menu: house bid percentage and flat minimum, people needed to settle, and Close table. See `RULES.todo.md` for the rules and open questions.
-- Bets and chips live in `src/lib/game.tsx` (`GameProvider` + `useTable(code)`) on top of the pure rules in `src/lib/bets.ts`: in-memory per table, reset on reload, seeded with three placeholder bets from other players. A "Demo: a friend confirms" button (`DEMO_MODE` in `game.tsx`) lets one person try the confirm flow alone. The Worker replaces all of this behind the same hook.
+- Bets and chips come from the Worker through `useTable(code)` (`src/lib/useTable.ts`, over the connection manager in `src/lib/tableClient.ts`), on top of the shared rules in `shared/bets.ts`. One WebSocket per table is shared by the page, footer and avatar menu. To try a table alone, open it in a second browser or private window with another name.
 
 ## Sooner
 
@@ -29,9 +29,9 @@ For friends and family playing on their phone while doing something else. Keep e
 - [ ] Polish the bet cards: chips animating into the pot and a short celebration when a bet settles in your favor, a real chip image, a "new activity" glow so changes are noticeable when a bet jumps to the top.
 - [ ] Table settings live in a modal opened from the avatar menu (host only). Later: a clearer home for host controls, and for showing players the house-bid rule so "Not that" isn't a mystery.
 - [ ] More players than fit: the footer lists others in a small scrolling block. Consider a tappable roster sheet with full names once tables get big.
-- [ ] Remove the `DEMO_MODE` demo button when the backend is wired up.
 - [ ] Dialogs are the design system's `Modal`, which closes after any action click, so submit buttons live inside the form and the modal's action area is just Cancel/Close. A `Modal` option for no action row or a controlled close would simplify this.
 - [ ] More stats in the sticky bar (candidates: your open bets, net winnings this table).
+- [ ] Upstream: `Input` doesn't pass through native attributes (`autoFocus`, `autoComplete`), so the name prompt can't focus its field on open.
 - [ ] Decide whether the room-code box should also strip vowels or just accept any letters (today: any letters; codes are generated from consonants only).
 
 - [ ] Upstream: `Hero` stacks title/tagline/actions, so it can't do the split join/host layout; the landing panel is plain CSS in `globals.css`. A two-region "split hero" or a `Divider` would let this move into the design system.

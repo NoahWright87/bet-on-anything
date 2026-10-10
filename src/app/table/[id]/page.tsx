@@ -1,17 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button, Card, Text } from "../../../ui";
 import BetCard from "../../../components/BetCard";
 import NewBetDialog from "../../../components/NewBetDialog";
 import NewOptionDialog from "../../../components/NewOptionDialog";
+import NamePrompt from "../../../components/NamePrompt";
 import OptionDialog from "../../../components/OptionDialog";
-import { useTable } from "../../../lib/game";
+import { getStoredName } from "../../../lib/player";
+import { useTable } from "../../../lib/useTable";
 import { tableCodeFromParam } from "../../../lib/roomCode";
 
 export default function Table() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
   const t = useTable(tableCodeFromParam(id));
   const [newBetOpen, setNewBetOpen] = useState(false);
   const [optionTarget, setOptionTarget] = useState<{ betId: string; optionId: string } | null>(null);
@@ -20,8 +23,47 @@ export default function Table() {
   const optionBet = t.bets.find((b) => b.id === optionTarget?.betId);
   const addBet = t.bets.find((b) => b.id === addToBetId);
 
+  if (t.status === "missing") {
+    return (
+      <div className="page">
+        <Card title="No such table">
+          <Text tone="muted">Check the room code with whoever is hosting, or start a table of your own.</Text>
+          <Button onClick={() => router.push("/")}>Back home</Button>
+        </Card>
+      </div>
+    );
+  }
+
+  if (t.status === "needs-name") {
+    return (
+      <NamePrompt
+        initial={getStoredName() ?? ""}
+        error={t.nameError}
+        onSubmit={t.setName}
+        onLeave={() => router.push("/")}
+      />
+    );
+  }
+
+  if (!t.ready) {
+    return (
+      <div className="page">
+        <Text tone="muted">{t.notice ?? "Joining the table…"}</Text>
+      </div>
+    );
+  }
+
   return (
     <div className="page">
+      {t.notice && (
+        <p className="notice" role="alert">
+          <span>{t.notice}</span>
+          <Button size="small" variant="text" onClick={t.dismissNotice}>
+            Dismiss
+          </Button>
+        </p>
+      )}
+
       <Button
         size="large"
         disabled={t.closed}

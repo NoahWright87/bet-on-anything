@@ -6,7 +6,7 @@ Where this project goes next. Pick items from the top; promote them into real wo
 
 - UI shell on `@noahwright/design`: header with nav menu + theme toggle, footer, hero landing page, placeholder pages.
 - Table page mock-up: BET button, multi-guess bet cards with chips, the `+` chip, "Not that" with an automatic house bid, pooled payouts, multi-person confirmation, ties, activity ordering, closing the table. Client-side placeholder state; rules in `RULES.todo.md`.
-- Backend stub in `worker/` (Hono + Durable Objects): create table, join over WebSocket, live participant list. Not wired to the UI yet.
+- Real backend in `worker/` (Hono + Durable Objects): the UI is wired to it, so two browsers share a table live. Server-side validation, names + resume tokens, reconnecting, host-only settings. Rules shared with the app in `shared/`. Unit tests for the rules.
 
 ## Sooner
 
@@ -14,13 +14,12 @@ Where this project goes next. Pick items from the top; promote them into real wo
   - Who creates a bet, and who resolves it (table host, vote, or the bettors themselves)?
   - Fixed odds, pari-mutuel pool, or free-form "I'll take that bet"?
   - Are chips play money per table, or does a balance persist across tables?
-- [ ] Wire the UI to the Worker so two browsers can share a table (see `DATA.todo.md`).
-- [ ] Participant list on the table page.
+- [ ] Deploy the Worker and point the Netlify build at it (see `DATA.todo.md`).
 - [ ] Rooms: a group holds several Tables that share currency.
 
 ## Later
 
-- [ ] Display names / lightweight identity (no passwords: pick a name, remembered per device).
+- [ ] Change your name, or show who is online (names are fixed per table today).
 - [ ] History page backed by real settled bets.
 - [ ] Share flow: copy room code, shareable link, QR code.
 - [ ] Deploy (static + serverless likely enough; match how `noahwright.dev` is hosted).

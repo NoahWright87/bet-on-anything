@@ -8,14 +8,12 @@ import {
   betPot,
   type Bet,
   type TableSettings,
-} from "../lib/bets";
-import { DEMO_MODE } from "../lib/game";
+} from "../../shared/bets";
 import OptionTile, { AddOptionTile, type TileState } from "./OptionTile";
 
 export type BetActions = {
   confirmResolution: (betId: string) => void;
   cancelProposal: (betId: string) => void;
-  simulateFriendConfirm: (betId: string) => void;
 };
 
 /** A full-width bet: the title out of the way, outcome chips below, "Not that" on the far right. */
@@ -106,11 +104,6 @@ export default function BetCard({
             <Button size="small" variant="outline" onClick={() => actions.cancelProposal(bet.id)}>
               Not yet
             </Button>
-            {DEMO_MODE && (
-              <Button size="small" variant="text" onClick={() => actions.simulateFriendConfirm(bet.id)}>
-                Demo: a friend confirms
-              </Button>
-            )}
           </span>
         </div>
       )}

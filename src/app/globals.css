@@ -384,3 +384,16 @@
   color: color-mix(in srgb, var(--foreground) 70%, transparent);
   margin-bottom: var(--spacing-sm);
 }
+
+/* A short message for the player: an action was refused, or the connection is down. */
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  margin: 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--danger) 14%, var(--background));
+  font-size: var(--text-sm);
+}

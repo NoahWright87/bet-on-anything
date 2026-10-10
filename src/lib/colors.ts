@@ -1,4 +1,4 @@
-import { HOUSE } from "./bets";
+import { HOUSE } from "../../shared/bets";
 
 /** Chip colors: you are always blue, the house is gray, everyone else gets a stable color from their name. */
 export const YOU_COLOR = "#2563eb";

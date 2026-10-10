@@ -1,5 +1,6 @@
 /**
- * Bet model and payout math. Plain TypeScript (no React) so it can move to the Worker.
+ * Bet model and payout math. Plain TypeScript (no React, no platform APIs): the Worker is the
+ * authority, and the app imports the same file to render and to pre-validate.
  *
  * A bet is a question ("Challenge winner") with several possible outcomes ("options"),
  * e.g. Andy, Betty. Players wager chips on an option. Every bet also has a built-in
@@ -16,6 +17,8 @@
  * - The house's share of a win disappears.
  * - A resolution needs `confirmationsRequired` different players to agree.
  */
+
+import { STARTING_CHIPS } from "./limits";
 
 export const NOT_THAT_ID = "not-that";
 export const NOT_THAT_LABEL = "Not that";
@@ -151,4 +154,18 @@ export function formatChipsCompact(amount: number): string {
   }
   if (abs >= 1e15) return `${Math.sign(amount) < 0 ? "-" : ""}${abs.toExponential(0).replace("e+", "e")}`;
   return `${Math.sign(amount) < 0 ? "-" : ""}${text}${suffixes[tier - 1]}`;
+}
+
+/**
+ * A player's chips are derived, never stored: they start with STARTING_CHIPS, lose what they
+ * stake, and gain what they are paid. (The house is not a player.)
+ */
+export function chipsOf(player: string, bets: Bet[]): number {
+  let chips = STARTING_CHIPS;
+  for (const bet of bets) {
+    const wagers = [...bet.options.flatMap((o) => o.wagers), ...bet.notThat];
+    for (const w of wagers) if (w.player === player) chips -= w.amount;
+    chips += bet.result?.payouts[player] ?? 0;
+  }
+  return chips;
 }
