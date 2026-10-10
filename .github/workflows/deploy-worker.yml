@@ -1,0 +1,74 @@
+name: Worker (test + deploy to Cloudflare)
+
+# Pull requests: typecheck and run the Worker's tests. Nothing is deployed.
+# Pushes to main: the same checks, then deploy to Cloudflare if they pass.
+# Can also be run by hand from the Actions tab (deploys whatever branch you pick, so
+# use it on main).
+#
+# `shared/` is in the path filter because the Worker imports the betting rules from there.
+# One-time setup (Cloudflare token, GitHub secrets) is in worker/README.md.
+on:
+  pull_request:
+    paths:
+      - "worker/**"
+      - "shared/**"
+      - ".github/workflows/deploy-worker.yml"
+  push:
+    branches: [main]
+    paths:
+      - "worker/**"
+      - "shared/**"
+      - ".github/workflows/deploy-worker.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: worker
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: worker/package-lock.json
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+
+  deploy:
+    needs: test
+    # Never from a pull request (forks don't get secrets, and a PR shouldn't touch production).
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    # One deploy at a time, in order; a newer push waits rather than cancelling one mid-flight.
+    concurrency:
+      group: deploy-worker
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: worker/package-lock.json
+
+      - run: npm ci
+        working-directory: worker
+
+      - name: Deploy to Cloudflare
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          # Only needed if the token can see more than one Cloudflare account; blank is ignored.
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: worker
+          command: deploy

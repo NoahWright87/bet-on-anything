@@ -19,7 +19,7 @@ The classes in `src/data/` (`Board`, `Bet`, `BetGroup`, `UserBet`, `User`) are a
 - [ ] Chips are integers validated in the Durable Object, but there is no cap on total chips (they can inflate through house bids and display in scientific notation past a quadrillion). Decide whether a cap makes sense. `MAX_AMOUNT` in `shared/limits.ts` only caps the house bid minimum.
 - [ ] Spoofing: anyone with the room code and an unused name can sit down, and anyone who clears their browser data loses their seat. Fine for friends; revisit with accounts.
 - [ ] Per-connection rate limiting: a client can flood actions on its own table. Messages are size-capped and tables are size-capped, but there is no throttle.
-- [ ] Deploy the Worker, set the real `ALLOWED_ORIGINS` (add the Netlify production URL and custom domain), and add deploy-preview origins if previews should talk to it.
+- [ ] Finish the Worker deploy (CI is set up: see `worker/README.md` for the Cloudflare token + GitHub secret), set the real `ALLOWED_ORIGINS` (Netlify production URL and custom domain), and decide whether Netlify deploy previews should talk to it (they have their own origins; a per-PR preview Worker like the VR repo's, or a pattern match in the origin check).
 
 ## Later
 

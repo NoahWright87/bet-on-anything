@@ -14,7 +14,7 @@ Where this project goes next. Pick items from the top; promote them into real wo
   - Who creates a bet, and who resolves it (table host, vote, or the bettors themselves)?
   - Fixed odds, pari-mutuel pool, or free-form "I'll take that bet"?
   - Are chips play money per table, or does a balance persist across tables?
-- [ ] Deploy the Worker and point the Netlify build at it (see `DATA.todo.md`).
+- [ ] Finish the first Worker deploy: add the Cloudflare token as a GitHub secret, then set `NEXT_PUBLIC_API_URL` on Netlify (CI auto-deploys the Worker from `main`; steps in `worker/README.md`).
 - [ ] Rooms: a group holds several Tables that share currency.
 
 ## Later

@@ -25,7 +25,7 @@ The app talks to the Worker at `NEXT_PUBLIC_API_URL` (default `http://localhost:
 cd worker && npm install && npm run dev    # http://localhost:8787
 ```
 
-For a deployed frontend (Netlify), set `NEXT_PUBLIC_API_URL` to the Worker's URL and add the site's origin to `ALLOWED_ORIGINS` in `worker/wrangler.jsonc`. See [`worker/README.md`](./worker/README.md).
+The Worker deploys itself from `main` through GitHub Actions (one-time Cloudflare + GitHub setup in [`worker/README.md`](./worker/README.md)). For a deployed frontend (Netlify), set `NEXT_PUBLIC_API_URL` to the Worker's URL and add the site's origin to `ALLOWED_ORIGINS` in `worker/wrangler.jsonc`. See [`worker/README.md`](./worker/README.md).
 
 ## Layout
 
@@ -41,6 +41,7 @@ For a deployed frontend (Netlify), set `NEXT_PUBLIC_API_URL` to the Worker's URL
 
 ### Real backend
 
+- GitHub Actions (`.github/workflows/deploy-worker.yml`): the Worker is typechecked and tested on every PR and auto-deployed to Cloudflare on pushes to `main` that touch `worker/` or `shared/`.
 - Tables, players, bets, chips, settling, host settings and closing now live in the Worker's Durable Object, so two browsers share a table in real time. HOST creates a table on the server; JOIN opens it (or shows "No such table").
 - First visit asks for a name (unique per table, no passwords). A per-table token in `localStorage` lets a refresh or a dropped connection resume the same seat; the client reconnects on its own.
 - Every action is validated server-side by `shared/table.ts` (stakes vs. chips, one confirmation per player, host-only settings, no wagers after settling or closing, size limits). The app runs the same check first so forms still show errors instantly.
