@@ -1,6 +1,6 @@
 "use client";
 
-import { HOUSE, formatChipsCompact, optionTotal, type Wager } from "../lib/bets";
+import { HOUSE, formatChipsCompact, optionTotal, type Wager } from "../../shared/bets";
 import { HOUSE_COLOR, playerColor } from "../lib/colors";
 import ChipToken from "./ChipToken";
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Footer } from "@noahwright/design";
-import { useTable, type PlayerSummary } from "../lib/game";
+import { useTable, type PlayerSummary } from "../lib/useTable";
 import { formatChips } from "../lib/formatChips";
 import ChipImage from "./ChipImage";
 

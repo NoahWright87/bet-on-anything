@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button, Input, Modal } from "@noahwright/design";
-import { MAX_LABEL_LENGTH } from "../lib/game";
+import { MAX_LABEL_LENGTH } from "../../shared/limits";
 
 /** The "+" chip: add your own guess to a bet, with a stake. */
 export default function NewOptionDialog({

@@ -3,10 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Input, Text } from "../ui";
-import { ROOM_CODE_LENGTH, generateRoomCode, sanitizeRoomCode } from "../lib/roomCode";
+import { createTable } from "../lib/api";
+import { ROOM_CODE_LENGTH, sanitizeRoomCode } from "../lib/roomCode";
 
 export default function Home() {
   const [roomCode, setRoomCode] = useState("");
+  const [hosting, setHosting] = useState(false);
+  const [hostError, setHostError] = useState<string>();
   const router = useRouter();
 
   const canJoin = roomCode.length === ROOM_CODE_LENGTH;
@@ -16,7 +19,16 @@ export default function Home() {
     if (canJoin) router.push(`/table/${roomCode}`);
   };
 
-  const hostTable = () => router.push(`/table/${generateRoomCode()}`);
+  const hostTable = async () => {
+    setHosting(true);
+    setHostError(undefined);
+    try {
+      router.push(`/table/${await createTable()}`);
+    } catch (err) {
+      setHostError(err instanceof Error ? err.message : "Couldn't create a table.");
+      setHosting(false);
+    }
+  };
 
   return (
     <>
@@ -36,13 +48,24 @@ export default function Home() {
           </Button>
         </form>
         <div className="landing-hero__host">
-          <Button size="large" color="secondary" onClick={hostTable} style={{ fontSize: "var(--text-xl)", padding: "1.25rem 1.5rem" }}>
-            HOST
+          <Button
+            size="large"
+            color="secondary"
+            onClick={hostTable}
+            disabled={hosting}
+            style={{ fontSize: "var(--text-xl)", padding: "1.25rem 1.5rem" }}
+          >
+            {hosting ? "…" : "HOST"}
           </Button>
         </div>
       </section>
 
       <div className="page">
+        {hostError && (
+          <p className="notice" role="alert">
+            {hostError}
+          </p>
+        )}
         <details className="about-details">
           <summary>What is this?</summary>
           <Text>

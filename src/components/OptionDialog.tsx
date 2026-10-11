@@ -9,7 +9,7 @@ import {
   optionTotal,
   type Bet,
   type TableSettings,
-} from "../lib/bets";
+} from "../../shared/bets";
 import { formatChips } from "../lib/formatChips";
 import { playerColor } from "../lib/colors";
 

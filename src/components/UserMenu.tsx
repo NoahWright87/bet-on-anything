@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, usePathname } from "next/navigation";
 import { Avatar, Menu, Modal, Text, getThemeMode, toggleThemeMode } from "@noahwright/design";
-import { useTable } from "../lib/game";
+import { useTable } from "../lib/useTable";
 import { usePlayer } from "../lib/player";
 import { tableCodeFromParam } from "../lib/roomCode";
 import TableSettingsDialog from "./TableSettingsDialog";

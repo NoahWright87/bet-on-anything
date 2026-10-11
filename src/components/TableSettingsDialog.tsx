@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button, Input, Modal, Text } from "@noahwright/design";
-import type { TableSettings } from "../lib/bets";
+import type { TableSettings } from "../../shared/bets";
 
 /** Host-only table settings. Mounted only while open, so the form starts from the current values. */
 export default function TableSettingsDialog({

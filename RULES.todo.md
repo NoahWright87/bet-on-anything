@@ -1,6 +1,6 @@
 # Betting rules and open questions
 
-What the placeholder UI does today (`src/lib/bets.ts`, state in `src/lib/game.tsx`), and what is still undecided. Change the rules in `bets.ts`; the Worker should reuse that file.
+What the game does today, and what is still undecided. Payout math is in `shared/bets.ts` and the checks on every action are in `shared/table.ts`; the Worker enforces them and the app imports the same files, so change the rules there.
 
 ## The model (as built)
 
@@ -14,8 +14,8 @@ What the placeholder UI does today (`src/lib/bets.ts`, state in `src/lib/game.ts
 - **Settling:** tap any chip, open "Settle this bet", and say that guess was correct. That proposes a result; a different set of players must confirm it (`confirmationsRequired`, default 2, the proposer counts as one). Changing the proposal or adding a guess restarts confirmations. Once enough agree, chips are paid out.
 - **Ties:** mark more than one guess correct before confirming; all winning stakes pool together. "Not that" and real guesses exclude each other.
 - **Activity order:** any new bet, wager, new guess, proposal, confirmation or settlement moves that bet to the top.
-- **Closing a table:** the host (placeholder: whoever is viewing) closes it from Table settings (avatar menu). No new bets or wagers afterward, but open bets can still be settled.
-- **Chips are derived:** a player's chips are 1,000 minus everything they staked plus everything they were paid (`chipsOf` in `game.tsx`), never stored, so every player's balance always adds up from the bets.
+- **Closing a table:** the host (the first player to join) closes it from Table settings (avatar menu). No new bets or wagers afterward, but open bets can still be settled.
+- **Chips are derived:** a player's chips are 1,000 minus everything they staked plus everything they were paid (`chipsOf` in `shared/bets.ts`), never stored, so every player's balance always adds up from the bets.
 - **Table settings** (host): house bid %, house bid minimum, and how many people must agree to settle a bet. Closing the table is in the same dialog.
 
 ## Decide next
@@ -25,7 +25,8 @@ What the placeholder UI does today (`src/lib/bets.ts`, state in `src/lib/game.ts
 - [ ] **Betting on "Not that" explicitly** is risky because more guesses can be added later (it dilutes the house bid per guess, and a late guess can win). Lock explicit Not-that wagers once there are N guesses? Warn more loudly? Today there is only a muted warning.
 - [ ] **Late guesses:** can anyone add a guess after others have bet? Allow only while no result is proposed (today a new guess cancels a proposal)?
 - [ ] **Undo:** can a wager be withdrawn? Today no.
-- [ ] **Limits:** minimum/maximum stake, max guesses per bet, max length of titles/guesses (60/24 today).
+- [ ] **Limits:** minimum/maximum stake. Already enforced (`shared/limits.ts`): 30 players per table, 300 bets, 12 guesses per bet, 500 wagers per bet, title/guess/name lengths 60/24/24. Are those the right numbers?
+- [ ] **Names:** a player is their name at the table, unique ignoring case. Fine for friends; two people can't both be "Sam".
 - [ ] **Naming:** the second field in the New bet form is "Your guess", and the other outcomes are called "guesses". Better words? ("Pick", "Outcome", "Side".)
 - [ ] **Players with many backers:** the chip stack shows at most 3 backers' colors. Is that enough, or show "+N"?
 - [ ] **Rooms:** a Room holds several Tables shared by a group, with shared currency. Chips are per table today (1,000 on joining).
