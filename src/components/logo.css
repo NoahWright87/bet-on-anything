@@ -1,0 +1,41 @@
+/* Logo colors follow the theme. Keep in sync with logoColors() in lib/logo.ts,
+   which computes the same mix for the static favicon. */
+.logo__silhouette {
+  fill: var(--secondary);
+}
+
+.logo__collar {
+  fill: color-mix(in srgb, var(--secondary) 55%, var(--background));
+}
+
+.logo__chips {
+  fill: var(--primary);
+}
+
+.logo__glasses {
+  fill: var(--background);
+}
+
+.logo__lenses {
+  fill: color-mix(in srgb, var(--secondary) 20%, #1a0a18);
+}
+
+.logo__reflection {
+  fill: color-mix(in srgb, #f2e3f1 80%, var(--secondary));
+}
+
+.logo__visorBand {
+  fill: color-mix(in srgb, var(--primary) 65%, var(--secondary));
+}
+
+.logo__visor {
+  fill: var(--primary);
+}
+
+.logo__chipTops {
+  fill: color-mix(in srgb, var(--primary) 60%, var(--background));
+}
+
+.logo__chipDetails {
+  fill: color-mix(in srgb, var(--secondary) 25%, var(--background));
+}

@@ -5,6 +5,7 @@ import { Footer } from "@noahwright/design";
 import { useTable, type PlayerSummary } from "../lib/useTable";
 import { formatChips } from "../lib/formatChips";
 import ChipImage from "./ChipImage";
+import InfrastructureLinks from "./InfrastructureLinks";
 
 /** First name, plus a last initial only when two players would otherwise look the same. */
 function shortName(name: string, all: PlayerSummary[]): string {
@@ -43,29 +44,31 @@ export default function TableFooter({ code }: { code: string }) {
     <Footer
       isSticky
       hasBottomSeparator
+      right={<InfrastructureLinks />}
       bottom={
         <button type="button" className="hud__code" onClick={copyCode} aria-label={`Room code ${code.split("").join(" ")}. Tap to copy`}>
           {copied ? "Copied!" : <>Room code <span className="hud__code-value">{code}</span> · tap to copy</>}
         </button>
       }
-    >
-      <div className="hud">
-        {me && (
-          <div className="hud__you" aria-label={`Your chips: ${me.chips.toLocaleString("en-US")}`} title={`${me.chips.toLocaleString("en-US")} chips`}>
-            <ChipImage size={36} />
-            <span className="hud__you-chips">{formatChips(me.chips)}</span>
-          </div>
-        )}
-        <ul className="hud__others" aria-label="Other players">
-          {others.map((p) => (
-            <li key={p.name} className="hud__other" title={`${p.name}: ${p.chips.toLocaleString("en-US")} chips`}>
-              <ChipImage size={16} />
-              <span className="hud__other-name">{shortName(p.name, players)}</span>
-              <span className="hud__other-chips">{formatChips(p.chips)}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </Footer>
+      center={
+        <div className="hud">
+          {me && (
+            <div className="hud__you" aria-label={`Your chips: ${me.chips.toLocaleString("en-US")}`} title={`${me.chips.toLocaleString("en-US")} chips`}>
+              <ChipImage size={36} />
+              <span className="hud__you-chips">{formatChips(me.chips)}</span>
+            </div>
+          )}
+          <ul className="hud__others" aria-label="Other players">
+            {others.map((p) => (
+              <li key={p.name} className="hud__other" title={`${p.name}: ${p.chips.toLocaleString("en-US")} chips`}>
+                <ChipImage size={16} />
+                <span className="hud__other-name">{shortName(p.name, players)}</span>
+                <span className="hud__other-chips">{formatChips(p.chips)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      }
+    />
   );
 }

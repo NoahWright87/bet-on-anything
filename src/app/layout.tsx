@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "@noahwright/design/styles.css";
 import "./globals.css";
 import SiteShell from "../components/SiteShell";
+import { theme, darkTheme } from "../lib/theme";
+import { buildThemeCss } from "../lib/themeCss";
 
 export const metadata: Metadata = {
   title: "Bet on Anything",
@@ -16,6 +18,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <style id="nw-theme" dangerouslySetInnerHTML={{ __html: buildThemeCss(theme, darkTheme) }} />
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
       </head>
       <body>
