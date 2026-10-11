@@ -1,0 +1,24 @@
+name: Clean up Worker preview
+
+# Deletes the per-PR preview Worker that preview-worker.yml deploys, whether the PR was merged
+# or just closed, so they don't pile up on the Cloudflare account. Safe if no preview was ever
+# deployed (a fork PR, say): continue-on-error treats "nothing to delete" as a no-op.
+on:
+  pull_request:
+    types: [closed]
+
+permissions: {}
+
+jobs:
+  cleanup:
+    # Fork PRs never had a preview, and don't get the secret anyway.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete preview Worker
+        continue-on-error: true
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: delete bet-on-anything-pr-${{ github.event.pull_request.number }} --force

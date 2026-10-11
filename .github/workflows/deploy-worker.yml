@@ -1,18 +1,12 @@
 name: Worker (test + deploy to Cloudflare)
 
-# Pull requests: typecheck and run the Worker's tests. Nothing is deployed.
-# Pushes to main: the same checks, then deploy to Cloudflare if they pass.
-# Can also be run by hand from the Actions tab (deploys whatever branch you pick, so
-# use it on main).
+# Pushes to main: typecheck and test the Worker, then deploy it to Cloudflare if that passes.
+# Can also be run by hand from the Actions tab (deploys whatever branch you pick, so use it on
+# main). Pull requests are handled by preview-worker.yml, which deploys a separate preview.
 #
 # `shared/` is in the path filter because the Worker imports the betting rules from there.
 # One-time setup (Cloudflare token, GitHub secrets) is in worker/README.md.
 on:
-  pull_request:
-    paths:
-      - "worker/**"
-      - "shared/**"
-      - ".github/workflows/deploy-worker.yml"
   push:
     branches: [main]
     paths:
@@ -45,8 +39,6 @@ jobs:
 
   deploy:
     needs: test
-    # Never from a pull request (forks don't get secrets, and a PR shouldn't touch production).
-    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     # One deploy at a time, in order; a newer push waits rather than cancelling one mid-flight.
     concurrency:

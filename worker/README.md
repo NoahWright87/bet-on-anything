@@ -42,20 +42,24 @@ CORS and the WebSocket `Origin` check use `ALLOWED_ORIGINS` in `wrangler.jsonc`.
 
 ## Deploy
 
-**Automatic:** `.github/workflows/deploy-worker.yml` typechecks and tests the Worker on every pull request, and on every push to `main` that touches `worker/` or `shared/` it deploys to Cloudflare once those pass. You can also run it by hand from the Actions tab (use `main`). Wrangler applies the Durable Object migrations in `wrangler.jsonc` as part of the deploy.
+Three GitHub Actions workflows (`.github/workflows/`):
+
+- **`deploy-worker.yml`**: on every push to `main` that touches `worker/` or `shared/` (or by hand from the Actions tab), typecheck, test and deploy the production Worker, `bet-on-anything`. Wrangler applies the Durable Object migrations in `wrangler.jsonc` as part of the deploy.
+- **`preview-worker.yml`**: on every pull request, typecheck and test, then deploy a separate live Worker, `bet-on-anything-pr-<number>`, with its own Durable Object storage, and comment its address on the PR. There is deliberately no path filter: every PR's Netlify preview is built to talk to its own Worker (below), so every PR needs one. Cloudflare's built-in preview URLs don't support Durable Objects, which is why this is a second real Worker. PRs from forks only run the tests (they get no secrets).
+- **`cleanup-worker-preview.yml`**: when a PR closes (merged or not), delete its preview Worker.
+
+**Which Worker the site talks to** is decided at build time by `compute-api-url.mjs` (used in `next.config.mjs`) from the variables Netlify sets itself: a deploy preview of PR N talks to `bet-on-anything-pr-N`, any other Netlify build talks to the production Worker, and local dev talks to `wrangler dev`. So there is nothing to configure on Netlify. Set `NEXT_PUBLIC_API_URL` only to override this (it wins). The `workers.dev` subdomain is hardcoded there; update `WORKERS_SUBDOMAIN` if the Cloudflare account ever changes.
+
+**Origins:** the production Worker allows the origins in `ALLOWED_ORIGINS` in `wrangler.jsonc` (exact match, scheme included; add a custom domain here). A preview Worker's list is replaced at deploy time with `http://localhost:3000` and `https://deploy-preview-<N>--<NETLIFY_SITE>.netlify.app`; `NETLIFY_SITE` is set at the top of `preview-worker.yml` and must match the Netlify site's name.
 
 **One-time setup:**
 
-1. A free [Cloudflare](https://dash.cloudflare.com/sign-up) account (the Free plan is enough: the Durable Object is SQLite-backed). It needs a `workers.dev` subdomain; if you've deployed any Worker before you already have one, otherwise Cloudflare asks you to pick one the first time (Workers & Pages in the dashboard).
-2. An API token: **My Profile → API Tokens → Create Token → "Edit Cloudflare Workers"** template. Copy it when shown; Cloudflare won't show it again.
-3. In GitHub: **repo Settings → Secrets and variables → Actions → New repository secret**, named `CLOUDFLARE_API_TOKEN`, value the token. Secrets are per repo, so another repo's secret isn't shared.
-4. Only if a deploy fails asking for an account: add `CLOUDFLARE_ACCOUNT_ID` too (a domain's Overview page, right sidebar, or Workers & Pages overview).
-5. After the first deploy, the log prints the Worker's URL, `https://bet-on-anything.<your-subdomain>.workers.dev`. Set it as `NEXT_PUBLIC_API_URL` in Netlify (**Site configuration → Environment variables**) and redeploy the site, since Next bakes it in at build time.
-6. Add every origin the site is served from (the Netlify URL, any custom domain) to `ALLOWED_ORIGINS` in `wrangler.jsonc`. It must match exactly, scheme included, and CORS and the WebSocket check both use it.
+1. A free [Cloudflare](https://dash.cloudflare.com/sign-up) account (the Free plan is enough: the Durable Object is SQLite-backed) with a `workers.dev` subdomain.
+2. An API token: **My Profile → API Tokens → Create Token → "Edit Cloudflare Workers"** template.
+3. In GitHub: **repo Settings → Secrets and variables → Actions → New repository secret**, named `CLOUDFLARE_API_TOKEN`. Secrets are per repo.
+4. Only if a deploy fails asking for an account: also add `CLOUDFLARE_ACCOUNT_ID` (a domain's Overview page, right sidebar).
 
 **By hand:** `npx wrangler login`, then `npm run deploy`.
-
-Netlify deploy previews have their own origin (`deploy-preview-N--<site>.netlify.app`), which is not in `ALLOWED_ORIGINS`, so previews can't talk to the production Worker. Adding preview Workers or a pattern match is a later todo (`DATA.todo.md`).
 
 ## Staying in the free tier
 
