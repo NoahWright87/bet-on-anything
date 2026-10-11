@@ -6,6 +6,8 @@ import { Footer, Header, Heading, HamburgerMenu, Layout, Link, Menu } from "@noa
 import { tableCodeFromParam } from "../lib/roomCode";
 import TableFooter from "./TableFooter";
 import UserMenu from "./UserMenu";
+import Logo from "./Logo";
+import InfrastructureLinks from "./InfrastructureLinks";
 
 const NAV = [
   { text: "Home", href: "/" },
@@ -22,11 +24,7 @@ function SiteFooter() {
           <Link href="https://noahwright.dev" isExternal>Noah Wright</Link>
         </span>
       }
-      right={
-        <Link href="https://github.com/NoahWright87/bet-on-anything" isExternal variant="subtle">
-          Source
-        </Link>
-      }
+      right={<InfrastructureLinks />}
     />
   );
 }
@@ -43,6 +41,7 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
     <Layout
       header={
         <Header
+          shadow={false}
           left={
             <Menu
               label="Navigation"
@@ -56,6 +55,7 @@ export default function SiteShell({ children }: { children: React.ReactNode }) {
           }
           center={
             <NextLink href="/" className="site-title">
+              <Logo className="site-logo" />
               <Heading level={1}>Bet on Anything</Heading>
             </NextLink>
           }

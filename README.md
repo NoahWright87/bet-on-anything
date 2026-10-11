@@ -12,6 +12,16 @@ Early work in progress. See [`ROADMAP.todo.md`](./ROADMAP.todo.md) for where it'
 
 ## Development
 
+The site uses the same light/dark orange and purple theme as NoahWrightDev2026
+(`src/lib/theme.ts`). Its poker silhouette extends that site's SVG; the header,
+browser favicon, and Apple touch icon share `src/lib/logo.ts`.
+
+Infrastructure links live in the footer's `right` slot on every route. The
+floating **Powered by Netlify** badge is injected by Netlify, outside this app.
+Disable it for this project in **Project configuration → General → Powered by
+Netlify badge**, then save. This setting takes effect without a redeploy; see
+[Netlify's badge documentation](https://docs.netlify.com/manage/projects/powered-by-netlify-badge/).
+
 ```bash
 npm install
 npm run dev     # http://localhost:3000
