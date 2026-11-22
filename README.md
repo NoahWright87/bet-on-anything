@@ -41,8 +41,8 @@ The Worker deploys itself from `main` through GitHub Actions, and every pull req
 
 - `src/app/`: routes (`/`, `/table/[id]`, `/history`, `/about`) and global layout
 - `src/ui.ts`: client boundary re-exporting the design-system components used by server components
-- `src/components/`: app-specific components (`SiteShell`, `UserMenu`, `TableFooter`, `ChipCount`)
-- `src/lib/`: the live table (`useTable.ts` over the WebSocket client in `tableClient.ts`), API URL helpers, this device's player name and tokens (`player.ts`), room codes, chip formatting
+- `src/components/`: app-specific components: the page frame (`SiteShell`, `UserMenu`, `Logo`, `InfrastructureLinks`), the table (`TableFooter`, `BetCard`, `OptionTile`, `ChipToken`, `ChipImage`) and its dialogs (`NamePrompt`, `NewBetDialog`, `NewOptionDialog`, `OptionDialog`, `TableSettingsDialog`)
+- `src/lib/`: the live table (`useTable.ts` over the WebSocket client in `tableClient.ts`), API URL helpers, this device's player name and tokens (`player.ts`), room codes, chip formatting, player colors (`colors.ts`), and the theme and logo (`theme.ts`, `themeCss.ts`, `logo.ts`)
 - `shared/`: code imported by both the app and the Worker: betting rules and payout math (`bets.ts`), the action validator (`table.ts`), WebSocket messages (`protocol.ts`), limits (`limits.ts`)
 - `src/data/`: old draft game model (unused, to be deleted)
 - `worker/`: backend, a separate package with its own `package.json` (see its README)
